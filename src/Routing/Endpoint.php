@@ -97,7 +97,7 @@ class Endpoint
                         [
                             "middleware" => $middleware_callable
                         ],
-                        "routing"
+                        "ap:routing"
                     );
                 }
             }
