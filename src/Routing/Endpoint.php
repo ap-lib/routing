@@ -56,7 +56,12 @@ class Endpoint
     public function validateException(bool $validateMiddlewareObjects = false): static
     {
         if (!is_callable($this->handler)) {
-            throw new UnexpectedValueException("Handler must be callable");
+            try {
+                $name = self::convert($this->handler);
+            } catch (Throwable){
+                $name = "";
+            }
+            throw new UnexpectedValueException("Handler `$name` must be callable");
         }
 
         foreach ($this->middleware as $mv) {
@@ -86,8 +91,7 @@ class Endpoint
      * This method ensures that middleware instances are created only once
      * Only middleware implementing `BeforeInterface` or `AfterInterface` will be included
      *
-     * @return array<string, BeforeInterface|AfterInterface> The list of middleware instances
-     *                                                       key is callable link to static method
+     * @return array<BeforeInterface|AfterInterface> The list of middleware instances
      */
     public function getMiddlewareObjects(): array
     {
@@ -96,7 +100,7 @@ class Endpoint
             foreach ($this->middleware as $middleware_callable) {
                 $obj = $middleware_callable();
                 if (($obj instanceof BeforeInterface) || ($obj instanceof AfterInterface)) {
-                    $this->middleware_objects[$middleware_callable] = $obj;
+                    $this->middleware_objects[] = $obj;
                 } else {
                     Log::error(
                         "middleware does not implement a required interface",
@@ -192,13 +196,13 @@ class Endpoint
      */
     public function run(Request $request, ?ResponseHandlerInterface $responseHandler = null): Response
     {
-        foreach ($this->getMiddlewareObjects() as $name => $middleware) {
+        foreach ($this->getMiddlewareObjects() as $middleware) {
             if ($middleware instanceof BeforeInterface) {
                 try {
                     $response = $middleware->before($request);
                 } catch (Throwable $e) {
                     throw new RuntimeException(
-                        "middleware `{$name}->before()` exception: " . $e->getMessage(),
+                        "middleware `->before()` exception: " . $e->getMessage(),
                         0,
                         $e
                     );
@@ -242,7 +246,7 @@ class Endpoint
             );
         }
 
-        foreach ($this->middleware as $name => $middleware) {
+        foreach ($this->getMiddlewareObjects() as $middleware) {
             if ($middleware instanceof AfterInterface) {
                 try {
                     if ($middleware->after($request, $response)) {
@@ -250,7 +254,7 @@ class Endpoint
                     }
                 } catch (Throwable $e) {
                     throw new RuntimeException(
-                        "middleware `{$name}->after()` exception: " . $e->getMessage(),
+                        "middleware `->after()` exception: " . $e->getMessage(),
                         0,
                         $e
                     );

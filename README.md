@@ -27,8 +27,100 @@ composer require ap-lib/routing
 
 ## Getting started
 
-### First example
+### Base use case
 
 ```php
-coming soon
+#Handlers must be static methods
+class MainController
+{
+    public static function handlerRoot(Request $request): Response
+    {
+        return new Response("main page");
+    }
+
+    public function handlerHelloName(Request $request): Response
+    {
+        $name = isset($request->get['name']) && is_string($request->get['name'])
+            ? $request->get['name']
+            : "guest";
+
+        return new Response("Hello " . htmlspecialchars($name));
+    }
+}
+
+// make routing
+$routing = new Hashmap();
+
+// setup index
+$index = $routing->getIndexMaker();
+
+$index->addEndpoint(Method::GET, "/", new Endpoint(
+    [MainController::class, "handlerRoot"]
+));
+
+$index->addEndpoint(Method::GET, "/hello", new Endpoint(
+    [MainController::class, "handlerHelloName"]
+));
+
+// init routing
+$routing->init($index->make());
+
+ // run `GET /`
+try {
+    $routingResult = $routing->getRoute(Method::GET, "/");
+} catch (NotFound) {
+    throw new Exception("ERROR NOT FOUND");
+}
+
+// execute handler + optional middlewares
+$response = $routingResult->endpoint->run(
+    request: new Request(
+        method: Method::GET,
+        path: "/",
+        get: [],
+        post: [],
+        cookie: [],
+        headers: [],
+        files: [],
+        body: "",
+        params: $routingResult->params,
+    )
+);
+
+/*
+    AP\Routing\Response\Response Object (
+        [body] => main page
+        [code] => 200
+    )
+*/
+
+// run `GET /hello?name=John`
+try {
+    $routingResult = $routing->getRoute(Method::GET, "/hello");
+} catch (NotFound) {
+    throw new Exception("ERROR NOT FOUND");
+}
+
+$response = $routingResult->endpoint->run(
+    request: new Request(
+        method: Method::GET,
+        path: "/hello",
+        get: ["name" => "John"],
+        post: [],
+        cookie: [],
+        headers: [],
+        files: [],
+        body: "",
+        params: $routingResult->params,
+    )
+);
+
+/*
+    AP\Routing\Response\Response Object
+    (
+        [body] => Hello John
+        [code] => 200
+    )
+*/
+
 ```

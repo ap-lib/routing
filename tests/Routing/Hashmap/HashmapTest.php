@@ -3,16 +3,15 @@
 namespace AP\Routing\Tests\Routing\Hashmap;
 
 use AP\Routing\Request\Method;
-use AP\Routing\Request\Request;
 use AP\Routing\Response\Handler\BaseResponseHandler;
 use AP\Routing\Routing\Endpoint;
 use AP\Routing\Routing\Exception\NotFound;
 use AP\Routing\Routing\Routing\Hashmap\Hashmap;
 use AP\Routing\Routing\Routing\Hashmap\HashmapIndex;
 use AP\Routing\Tests\Helpers\Handlers;
+use AP\Routing\Tests\Helpers\MakeDefaultRequest;
 use Exception;
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
 final class HashmapTest extends TestCase
 {
@@ -49,36 +48,27 @@ final class HashmapTest extends TestCase
     public function testBasicFlow(): void
     {
         $routing = new Hashmap();
+
         $routing->init($this->makeBaseIndex());
 
         try {
-            try {
-                $res      = $routing->getRoute(Method::GET, self::PATH_ROOT);
-                $response = $res->endpoint->run(
-                    request: new Request(
-                        method: Method::GET,
-                        path: self::PATH_ROOT,
-                        get: [],
-                        post: [],
-                        cookie: [],
-                        headers: [],
-                        files: [],
-                        body: "",
-                        params: $res->params
-                    ),
-                    responseHandler: new BaseResponseHandler() // to convert string response from handler to Response object
-                );
-                $this->assertEquals(
-                    Handlers::handlerRoot(),
-                    $response->body
-                );
-            } catch (NotFound) {
-                throw new Exception("ERROR NOT FOUND");
-            }
-        } catch (Throwable) {
-            throw new Exception("OTHER ERROR");
+            $routingResult = $routing->getRoute(Method::GET, self::PATH_ROOT);
+        } catch (NotFound) {
+            throw new Exception("ERROR NOT FOUND");
         }
+
+        $response = $routingResult->endpoint->run(
+            request: MakeDefaultRequest::make(self::PATH_ROOT),
+            responseHandler: new BaseResponseHandler() // to convert string response from handler to Response object
+        );
+
+        $this->assertEquals(
+            Handlers::handlerRoot(),
+            $response->body
+        );
     }
+
+    // typical errors
 
     public function testNotFound(): void
     {
@@ -88,27 +78,12 @@ final class HashmapTest extends TestCase
         $routing->getRoute(Method::GET, "/not-found");
     }
 
-    public function testHandlerWithException(): void
+    public function testNotFoundWithThisMethod(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotFound::class);
         $routing = new Hashmap();
         $routing->init($this->makeBaseIndex());
-        $routing->getRoute(Method::GET, self::PATH_EXCEPTION)
-            ->endpoint
-            ->run(
-                request: new Request(
-                    method: Method::GET,
-                    path: self::PATH_ROOT,
-                    get: [],
-                    post: [],
-                    cookie: [],
-                    headers: [],
-                    files: [],
-                    body: "",
-                    params: []
-                ),
-                responseHandler: new BaseResponseHandler() // to convert string response from handler to Response object
-            );
+        $routing->getRoute(Method::POST, self::PATH_ROOT);
     }
 
     public function testHandlerWithException(): void
@@ -118,19 +93,8 @@ final class HashmapTest extends TestCase
         $routing->init($this->makeBaseIndex());
         $routing->getRoute(Method::GET, self::PATH_EXCEPTION)
             ->endpoint
-            ->run(
-                request: new Request(
-                    method: Method::GET,
-                    path: self::PATH_EXCEPTION,
-                    get: [],
-                    post: [],
-                    cookie: [],
-                    headers: [],
-                    files: [],
-                    body: "",
-                    params: []
-                ),
-                responseHandler: new BaseResponseHandler() // to convert string response from handler to Response object
-            );
+            ->run(MakeDefaultRequest::make(self::PATH_ROOT));
     }
+
+
 }

@@ -19,9 +19,9 @@ class MakeDefaultRequest
         string  $body = "",
         array   $params = [],
         Context $context = new Context()
-    ): string
+    ): Request
     {
-        new Request(
+        return new Request(
             method: $method,
             path: $path,
             get: $get,

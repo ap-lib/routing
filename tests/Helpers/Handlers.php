@@ -2,8 +2,8 @@
 
 namespace AP\Routing\Tests\Helpers;
 
+use AP\Routing\Request\Request;
 use Exception;
-use PHPUnit\Event\Code\Throwable;
 
 class Handlers
 {
@@ -49,5 +49,14 @@ class Handlers
     public static function handlerThrowException(): string
     {
         throw new Exception();
+    }
+
+    public function handlerHelloName(Request $request): string
+    {
+        $name = isset($request->get['name']) && is_string($request->get['name'])
+            ? $request->get['name']
+            : "guest";
+
+        return "Hello " . htmlspecialchars($name);
     }
 }

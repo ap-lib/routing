@@ -27,13 +27,10 @@ class Response
      * Initializes a new HTTP response instance.
      *
      *
-     * @param Generator|string $body The response body, which can be a string or a Generator for streaming responses
+     * @param Generator<string>|string $body The response body, which can be a string or a Generator for streaming responses
      * @param int $code The HTTP status code, default: 200 OK
      */
     public function __construct(
-        /**
-         * @var Generator<string>|string
-         */
         public Generator|string $body = "",
         public int              $code = 200,
     )
