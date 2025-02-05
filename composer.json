@@ -1,6 +1,6 @@
 {
   "name": "ap-lib/routing",
-  "description": "",
+  "description": "High-performance, flexible PHP routing library designed for speed and extensibility. Routing is optimized for static method calls and relies on a pre-built index for maximum efficiency. It provides simple, direct hashmap-based routing while allowing custom strategies and middleware support.",
   "type": "library",
   "homepage": "https://github.com/ap-lib/routing",
   "license": "MIT",
