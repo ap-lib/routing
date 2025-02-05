@@ -17,7 +17,7 @@ use AP\Routing\Routing\Routing\IndexInterface;
  *
  * @see Hashmap related worker implementation
  */
-class HashmapIndexInterface implements IndexInterface
+class HashmapIndex implements IndexInterface
 {
     public const string ROUTE_REGEXP = "#^/[a-zA-Z0-9_\-./:@&=+$,;!*'()%]*$#";
 
@@ -52,7 +52,7 @@ class HashmapIndexInterface implements IndexInterface
                 throw new DuplicateRoutePath();
             }
         } else {
-            $this->routes[$method->value][$path] = $endpoint->validateException(true)->serialize();
+            $this->routes[$method->value][$path] = $endpoint->serialize();
         }
         return $this;
     }

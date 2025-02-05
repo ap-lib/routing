@@ -27,18 +27,18 @@ class Endpoint
     protected ?array $middleware_objects = null;
 
     /**
-     * @param string $handler The callable handler responsible for processing the request
+     * @param string|array $handler The callable handler responsible for processing the request
      *                        It must be a static method reference and can have one of the following signatures:
      *                         `- fn(Request $request): Response|mixed`
      *                         `- fn(): Response|mixed`
      *
-     * @param array<string> $middleware List of strings referencing static methods, where each method must return
+     * @param array<string|array> $middleware List of strings referencing static methods, where each method must return
      *                                  an object implementing `BeforeInterface` and/or `AfterInterface`
      *                                  Middleware static methods mustn't have any parameters
      */
     public function __construct(
-        readonly public string $handler,
-        readonly public array  $middleware = [],
+        readonly public string|array $handler,
+        readonly public array        $middleware = [],
     )
     {
     }
@@ -60,13 +60,19 @@ class Endpoint
         }
 
         foreach ($this->middleware as $mv) {
-            if (!is_string($mv) || !is_callable($mv)) {
-                throw new UnexpectedValueException("All middleware must be strings and callable");
+            if (!(is_string($mv) || is_array($mv)) || !is_callable($mv)) {
+                throw new UnexpectedValueException("All middleware must be strings or array and callable");
             }
             if ($validateMiddlewareObjects) {
-                $mv = $mv();
-                if (!($mv instanceof BeforeInterface) && !($mv instanceof AfterInterface)) {
-                    throw new UnexpectedValueException("middleware no implemented a required interface");
+                $mv_res = $mv();
+                if (!($mv_res instanceof BeforeInterface) && !($mv_res instanceof AfterInterface)) {
+                    $before  = BeforeInterface::class;
+                    $after   = AfterInterface::class;
+                    $mw_text = self::convert($mv);
+                    throw new UnexpectedValueException(
+                        "The result of this function `$mw_text`, used as a middleware link, must be an object " .
+                        "that implements one of the required interfaces: $before or $after."
+                    );
                 }
             }
         }
@@ -106,15 +112,51 @@ class Endpoint
     }
 
     /**
-     * Serializes the endpoint into a string representation
+     * convert array/string callable to sting callable
+     * with no validation what it is valid callable
+     * just checking format if array it is = [string, string]
+     *
+     * @param array|string $callable
+     * @return string
+     */
+    private static function convert(array|string $callable): string
+    {
+
+        if (is_array($callable)) {
+            if (
+                count($callable) == 2
+                && isset($callable[0], $callable[1])
+                && is_string($callable[0])
+                && is_string($callable[1])
+            ) {
+                return $callable[0] . "::" . $callable[1];
+            }
+            throw new RuntimeException("");
+        }
+        return $callable;
+    }
+
+    /**
+     * Serializes the endpoint into a string representation with deep validation
      *
      * @return string The serialized representation of the endpoint
+     * @throws UnexpectedValueException If the handler isn't callable or if middleware is invalid.
      */
     public function serialize(): string
     {
+        $this->validateException(true);
+
         return implode(
             ",",
-            array_merge([$this->handler], $this->middleware)
+            array_merge(
+                [self::convert($this->handler)],
+                array_map(
+                    function ($v) {
+                        return self::convert($v);
+                    },
+                    $this->middleware
+                )
+            )
         );
     }
 

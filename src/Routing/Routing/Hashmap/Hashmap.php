@@ -26,7 +26,7 @@ class Hashmap implements RoutingInterface
 
     /**
      * @param array<string,string> $index
-     * @see HashmapIndexInterface you must to the prepare index use this class
+     * @see HashmapIndex you must to the prepare index use this class
      */
     public function init(array $index): static
     {
@@ -59,10 +59,10 @@ class Hashmap implements RoutingInterface
     /**
      * Return related with Hashmap index maker
      *
-     * @return HashmapIndexInterface
+     * @return HashmapIndex
      */
     public function getIndexMaker(): IndexInterface
     {
-        return new HashmapIndexInterface();
+        return new HashmapIndex();
     }
 }
