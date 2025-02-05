@@ -75,7 +75,6 @@ final class BaseUseCaseTest extends TestCase
         );
 
         $this->assertEquals("main page", $response->body);
-        print_r($response);
 
         // run `GET /hello?name=John`
         try {
@@ -97,7 +96,6 @@ final class BaseUseCaseTest extends TestCase
                 params: $routingResult->params,
             )
         );
-        print_r($response);
 
         $this->assertEquals("Hello John", $response->body);
     }
