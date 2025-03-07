@@ -12,6 +12,7 @@ class Handlers
     const string RESULT_STATIC_PUBLIC     = 'static_public';
     const string RESULT_STATIC_PROTECTED  = 'static_protected';
     const string RESULT_NON_STATIC_PUBLIC = 'non_static_public';
+    const string RESULT_WITH_ATTRIBUTE_MW = 'with_attribute_mv';
 
     public static function handlerStaticPublic(): string
     {
@@ -58,5 +59,10 @@ class Handlers
             : "guest";
 
         return "Hello " . htmlspecialchars($name);
+    }
+
+    public function handlerWithAttributeMiddleware(): string
+    {
+        return self::RESULT_WITH_ATTRIBUTE_MW;
     }
 }

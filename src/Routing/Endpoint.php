@@ -8,6 +8,7 @@ use AP\Routing\Middleware\BeforeInterface;
 use AP\Routing\Request\Request;
 use AP\Routing\Response\Handler\ResponseHandlerInterface;
 use AP\Routing\Response\Response;
+use AP\Routing\Routing\Endpoint\ParseMiddleware\ParseMiddlewareInterface;
 use RuntimeException;
 use Throwable;
 use UnexpectedValueException;
@@ -24,8 +25,6 @@ use UnexpectedValueException;
  */
 class Endpoint
 {
-    protected ?array $middleware_objects = null;
-
     /**
      * @param string|array $handler The callable handler responsible for processing the request
      *                        It must be a static method reference and can have one of the following signatures:
@@ -58,7 +57,7 @@ class Endpoint
         if (!is_callable($this->handler)) {
             try {
                 $name = self::convert($this->handler);
-            } catch (Throwable){
+            } catch (Throwable) {
                 $name = "";
             }
             throw new UnexpectedValueException("Handler `$name` must be callable");
@@ -93,26 +92,30 @@ class Endpoint
      *
      * @return array<BeforeInterface|AfterInterface> The list of middleware instances
      */
-    public function getMiddlewareObjects(): array
+    public function getMiddlewareObjects(?ParseMiddlewareInterface $middlewareParser = null): array
     {
-        if (is_null($this->middleware_objects)) {
-            $this->middleware_objects = [];
-            foreach ($this->middleware as $middleware_callable) {
-                $obj = $middleware_callable();
-                if (($obj instanceof BeforeInterface) || ($obj instanceof AfterInterface)) {
-                    $this->middleware_objects[] = $obj;
-                } else {
-                    Log::error(
-                        "middleware does not implement a required interface",
-                        [
-                            "middleware" => $middleware_callable
-                        ],
-                        "ap:routing"
-                    );
-                }
+        $result = [];
+        foreach ($this->middleware as $middleware_callable) {
+            $obj = $middleware_callable();
+            if (($obj instanceof BeforeInterface) || ($obj instanceof AfterInterface)) {
+                $result[] = $obj;
+            } else {
+                Log::error(
+                    "middleware does not implement a required interface",
+                    [
+                        "middleware" => $middleware_callable
+                    ],
+                    "ap:routing"
+                );
             }
         }
-        return $this->middleware_objects;
+
+        if ($middlewareParser instanceof ParseMiddlewareInterface) {
+            foreach ($middlewareParser->parse($this) as $mv) {
+                $result[] = $mv;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -190,13 +193,20 @@ class Endpoint
      *
      * @param Request $request The incoming HTTP request
      * @param ResponseHandlerInterface|null $responseHandler Optional response handler for converting responses
+     * @param ParseMiddlewareInterface|null $middlewareParser Optional parser for additional middlewares, no
      * @return Response The processed response
      *
      * @throws RuntimeException If the handler or middleware produces an invalid response
      */
-    public function run(Request $request, ?ResponseHandlerInterface $responseHandler = null): Response
+    public function run(
+        Request                   $request,
+        ?ResponseHandlerInterface $responseHandler = null,
+        ?ParseMiddlewareInterface $middlewareParser = null,
+    ): Response
     {
-        foreach ($this->getMiddlewareObjects() as $middleware) {
+        $middlewares = $this->getMiddlewareObjects($middlewareParser);
+
+        foreach ($middlewares as $middleware) {
             if ($middleware instanceof BeforeInterface) {
                 try {
                     $response = $middleware->before($request);
@@ -246,7 +256,7 @@ class Endpoint
             );
         }
 
-        foreach ($this->getMiddlewareObjects() as $middleware) {
+        foreach ($middlewares as $middleware) {
             if ($middleware instanceof AfterInterface) {
                 try {
                     if ($middleware->after($request, $response)) {

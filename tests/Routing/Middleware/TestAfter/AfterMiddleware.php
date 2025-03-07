@@ -5,7 +5,9 @@ namespace AP\Routing\Tests\Routing\Middleware\TestAfter;
 use AP\Routing\Middleware\AfterInterface;
 use AP\Routing\Request\Request;
 use AP\Routing\Response\Response;
+use Attribute;
 
+#[Attribute]
 readonly class AfterMiddleware implements AfterInterface
 {
     public function __construct(

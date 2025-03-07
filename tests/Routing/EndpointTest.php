@@ -74,4 +74,15 @@ final class EndpointTest extends TestCase
             ))->serialize()
         );
     }
+
+    public function testAttributeMiddleware(): void
+    {
+        (new Endpoint(
+            [Handlers::class, "handlerStaticPublic"],
+            [
+                [Handlers::class, "goodMiddlewareStatic"],
+                [Handlers::class, "goodMiddlewareStatic"]
+            ]
+        ));
+    }
 }
