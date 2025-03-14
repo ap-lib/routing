@@ -24,7 +24,6 @@
   "require": {
     "php": "^8.3",
     "ap-lib/logger": "dev-main",
-    "ap-lib/persistent-cache": "dev-main",
     "ap-lib/context": "dev-main"
   },
   "require-dev": {
