@@ -170,12 +170,14 @@ class Endpoint
     /**
      * Deserializes a string representation into an `Endpoint` instance
      *
-     * @param string $data The serialized endpoint data
+     * @param string|array $data The serialized endpoint data
      * @return static The deserialized `Endpoint` instance
      */
-    public static function deserialize(string $data): static
+    public static function deserialize(string|array $data): static
     {
-        $data = explode(",", $data);
+        $data = is_array($data)
+            ? $data
+            : explode(",", $data);
         return new static(
             $data[0],
             array_slice($data, 1)
