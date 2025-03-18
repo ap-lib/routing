@@ -20,6 +20,7 @@ class Request
      * @param array<string, mixed> $files Uploaded files
      * @param string $body The raw request body, useful for JSON, XML, or other raw payloads
      * @param array<string, string> $params Path parameters extracted from the route definition. These are dynamically mapped based on routing configuration
+     * @param string $ip User's request ip address
      * @param Context $context A mutable context object for storing metadata exchanged between middleware and the handler
      */
     public function __construct(
@@ -32,6 +33,7 @@ class Request
         readonly public array  $files,
         readonly public string $body,
         readonly public array  $params,
+        readonly public string $ip,
         public Context         $context = new Context()
     )
     {
