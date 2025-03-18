@@ -3,7 +3,6 @@
 namespace AP\Routing\Response;
 
 use JsonException;
-use JsonSerializable;
 
 /**
  * JSON response class extending Response.
@@ -24,8 +23,8 @@ class Json extends Response
      * @throws JsonException
      */
     public function __construct(
-        array|string|JsonSerializable $body,
-        int                           $code = 200,
+        array|string|object $body,
+        int                 $code = 200,
     )
     {
         if (!is_string($body)) {
