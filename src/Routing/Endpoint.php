@@ -240,7 +240,7 @@ class Endpoint
                 $response = $responseHandler->convert($response);
             } catch (Throwable $e) {
                 throw new RuntimeException(
-                    "invalid handler response `$this->handler`: " . $e->getMessage(),
+                    "invalid handler response `" . self::convert($this->handler) . "`: " . $e->getMessage(),
                     0,
                     $e
                 );

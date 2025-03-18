@@ -6,7 +6,6 @@ use AP\Routing\Response\Json;
 use AP\Routing\Response\Response;
 use Generator;
 use JsonException;
-use JsonSerializable;
 use RuntimeException;
 
 /**
@@ -35,15 +34,15 @@ class BaseResponseHandler implements ResponseHandlerInterface
             $response = new Response($response);
         } elseif (is_array($response)) {
             $response = new Json($response);
-        } elseif ($response instanceof JsonSerializable) {
-            $serialized = $response->jsonSerialize();
-            if (is_array($serialized)) {
-                $response = new Json($serialized);
-            }
         }
 
         if ($response instanceof Response) {
             return $response;
+        } elseif (is_object($response)) {
+            $serialized = json_encode($response);
+            if (is_array($serialized)) {
+                return new Json($serialized);
+            }
         }
         throw new RuntimeException(
             "response must be array, string, Generator, or Response"
