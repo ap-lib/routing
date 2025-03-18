@@ -3,6 +3,7 @@
 namespace AP\Routing\Response;
 
 use JsonException;
+use JsonSerializable;
 
 /**
  * JSON response class extending Response.
@@ -18,16 +19,16 @@ class Json extends Response
      * If the body is an array, it is automatically converted to a JSON string.
      * The `Content-Type` header is set to `application/json`.
      *
-     * @param array|string $body The response data, either a JSON-encoded string or an array to be encoded.
+     * @param array|string|JsonSerializable $body The response data, either a JSON-encoded string or an array to be encoded.
      * @param int $code The HTTP status code (default: 200).
      * @throws JsonException
      */
     public function __construct(
-        array|string $body,
-        int          $code = 200,
+        array|string|JsonSerializable $body,
+        int                           $code = 200,
     )
     {
-        if (is_array($body)) {
+        if (is_array($body) || $body instanceof JsonSerializable) {
             $body = json_encode($body, JSON_THROW_ON_ERROR);
         }
 
