@@ -84,6 +84,7 @@ $response = $routingResult->endpoint->run(
         files: [],
         body: "",
         params: $routingResult->params,
+        ip: "127.0.0.1"
     )
 );
 
@@ -112,6 +113,7 @@ $response = $routingResult->endpoint->run(
         files: [],
         body: "",
         params: $routingResult->params,
+        ip: "127.0.0.1"
     )
 );
 

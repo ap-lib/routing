@@ -71,6 +71,7 @@ final class BaseUseCaseTest extends TestCase
                 files: [],
                 body: "",
                 params: $routingResult->params,
+                ip: "127.0.0.1"
             )
         );
 
@@ -94,6 +95,7 @@ final class BaseUseCaseTest extends TestCase
                 files: [],
                 body: "",
                 params: $routingResult->params,
+                ip: "127.0.0.1"
             )
         );
 

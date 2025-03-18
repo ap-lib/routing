@@ -18,6 +18,7 @@ class MakeDefaultRequest
         array   $files = [],
         string  $body = "",
         array   $params = [],
+        string  $ip = "127.0.0.1",
         Context $context = new Context()
     ): Request
     {
@@ -31,7 +32,8 @@ class MakeDefaultRequest
             files: $files,
             body: $body,
             params: $params,
-            context: $context
+            ip: $ip,
+            context: $context,
         );
     }
 }
