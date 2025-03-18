@@ -229,7 +229,7 @@ class Endpoint
             $response = ($this->handler)($request);
         } catch (Throwable $e) {
             throw new RuntimeException(
-                "Handler `$this->handler` exception: " . $e->getMessage(),
+                "Handler `" . self::convert($this->handler) . "` exception: " . $e->getMessage(),
                 0,
                 $e
             );
@@ -250,7 +250,7 @@ class Endpoint
         if (!($response instanceof Response)) {
             $type = get_debug_type($response);
             throw new RuntimeException(
-                "Handler `$this->handler` must return a `" . Response::class . "` object but returned `$type`. " .
+                "Handler `" . self::convert($this->handler) . "` must return a `" . Response::class . "` object but returned `$type`. " .
                 ($responseHandler instanceof ResponseHandlerInterface
                     ? "The current ResponseHandler `" . $responseHandler::class . "` is in use."
                     : "Consider using a ResponseHandler for enhanced flexibility."
