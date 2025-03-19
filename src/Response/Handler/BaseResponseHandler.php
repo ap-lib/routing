@@ -39,7 +39,7 @@ class BaseResponseHandler implements ResponseHandlerInterface
         if ($response instanceof Response) {
             return $response;
         } elseif (is_object($response)) {
-            return new Json(json_encode($response));
+            return new Json(json_encode($response, JSON_THROW_ON_ERROR));
         }
         throw new RuntimeException(
             "response must be array, string, Generator, or Response"
