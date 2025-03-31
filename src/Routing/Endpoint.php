@@ -214,7 +214,7 @@ class Endpoint
                     $response = $middleware->before($request);
                 } catch (Throwable $e) {
                     throw new RuntimeException(
-                        "middleware `->before()` exception: " . $e->getMessage(),
+                        "middleware `" . $middleware::class . "->before()` exception: " . $e->getMessage(),
                         0,
                         $e
                     );
