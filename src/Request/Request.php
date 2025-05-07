@@ -38,4 +38,9 @@ class Request
     )
     {
     }
+
+    public function userAgent(): ?string
+    {
+        return $this->headers['User-Agent'] ?? null;
+    }
 }
