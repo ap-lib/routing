@@ -49,7 +49,7 @@ class HashmapIndex implements IndexInterface
         if (isset($this->routes[$method->value][$path])) {
             // if duplicate endpoint is same ignore it
             if ($endpoint->serialize() != $this->routes[$method->value][$path]) {
-                throw new DuplicateRoutePath();
+                throw new DuplicateRoutePath("path: $path, method: $method->value");
             }
         } else {
             $this->routes[$method->value][$path] = $endpoint->serialize();
